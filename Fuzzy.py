@@ -19,7 +19,7 @@ for hit in res['hits']['hits']:
 
 query1 = {"query" : {
             "query_string" : {
-                "query" : "charges",
+                "query" : "आपरेटर",
                 "fuzziness" : 1}}}
 
 res = es.search(index = "hindi", body = query1)
