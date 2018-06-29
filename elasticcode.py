@@ -5,6 +5,7 @@ import os
 
 import json
 import collections
+import string
 
 res = requests.get('http://localhost:9200')
 print(res.content)
@@ -40,6 +41,7 @@ for word in worde:
     res = es.search(index='conversion', body={'query': {'match' : { 'English' : word }}})
 
     reqTranslation = []
+    nt = []
 
     for hit in res['hits']['hits']:
         print(hit['_id'], '->', hit['_source'])
@@ -48,7 +50,14 @@ for word in worde:
 
     print(reqTranslation)
 
-    words = [word for line in reqTranslation for word in line.split()] 
+    translator = str.maketrans('','', string.punctuation)
+
+    for i in range(len(reqTranslation)):
+        nt.append(reqTranslation[i].translate(translator))
+
+    print(nt)
+
+    words = [word for line in nt for word in line.split()] 
 
     print(words,'\n\n')
 
