@@ -31,12 +31,40 @@ txtNum = 0
 
 book.close()
 
-sentence = 'please enter'
+sentence = 'please enter loan amount'
 
-worde = sentence.split()
-print(worde)
+#income
+#loan amount
+#phone number
 
 t = []
+
+'''Template'''
+
+template = {}
+inTemplate = False
+template.update({'please enter': ['कृपया', 'दर्ज करें']})
+
+print(template['please enter'][0])
+
+words = sentence.split(' ')
+maxlen = 2
+index = 0
+
+while index < len(words):
+    for i in range(maxlen, 0, -1):
+        phrase = ' '.join(words[index:index+i])
+        if phrase in template:
+            inTemplate = True
+            sentence = sentence.replace(phrase,'')
+            index += i
+            break
+    else:
+        index += 1
+
+print(sentence)
+
+worde = sentence.split()
 
 for word in worde:
     res = es.search(index='conversion', body={'query': {'match' : { 'English' : word }}})
@@ -73,11 +101,9 @@ for word in worde:
         else:
             t.append(name1)
 
-print('Translation -> ', str(' '.join(t)))
+if inTemplate == True:
+    print('Translation -> ', template['please enter'][0], str(' '.join(t)), template['please enter'][1])
 
-template = {}
-template.update({sentence:t})
-print(template)
     
 
 
