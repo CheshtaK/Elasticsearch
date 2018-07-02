@@ -13,24 +13,25 @@ print(res.content)
 from elasticsearch import Elasticsearch
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-book = open(r'paytm2.txt', encoding = 'utf-8')
+book = open(r'enhitr.txt', encoding = 'utf-8')
 lineNum = 0 
 txtNum = 0 
 
 ##for line in book:
 ##    lineNum += 1
+##    print(lineNum)
 ##    if len(line) > 0:
 ##            txtNum += 1
 ##            val = line.split('\t')
 ##            es.index(index='conversion', doc_type='file', id=txtNum, body = {
 ##                'Translation': val[0],
 ##                'English': val[1]
-##            })
-    
+##            }, request_timeout=30)
+##    
 
 book.close()
 
-sentence = 'science and diploma'
+sentence = 'please enter'
 
 worde = sentence.split()
 print(worde)
@@ -50,6 +51,7 @@ for word in worde:
 
     print(reqTranslation)
 
+    '''Cleaning the corpus - Removing punctuations'''
     translator = str.maketrans('','', string.punctuation)
 
     for i in range(len(reqTranslation)):
@@ -64,10 +66,18 @@ for word in worde:
     counts = collections.Counter(words)
 
     if counts:
-        name, count = counts.most_common(1)[0]
-        t.append(name)
+        name1, count1 = counts.most_common(2)[0]
+        name2, count2 = counts.most_common(2)[1]
+        if count1 == count2:
+            t.append(name1+' '+name2)
+        else:
+            t.append(name1)
 
 print('Translation -> ', str(' '.join(t)))
+
+template = {}
+template.update({sentence:t})
+print(template)
     
 
 
