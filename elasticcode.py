@@ -74,6 +74,10 @@ def translate(lst):
                 
     return t    
 
+##test = []
+##test.append('income')
+##print(translate(test))
+
 
 '''Main Translation'''
 
@@ -143,3 +147,16 @@ elif len(sentence) < len(nenglish[0]):
     t = translate(remove)  
     print (nhindi[0].replace(t[0],''))
 
+#Case 3: Length of result less than sentence and appending at the end
+elif len(sentence) > len(nenglish[0]):
+    find = list(set(sentence.split()) - set(nenglish[0].split()))
+    t = translate(find)
+    t = t[::-1]
+
+    *rest, last = nenglish[0].split()
+    lastL = []
+    lastL.append(last)
+    
+    lastHindi = translate(lastL)
+    
+    print (nhindi[0].replace(str(lastHindi[0]), str(lastHindi[0])+' '+ str(' '.join(t))))
