@@ -31,10 +31,11 @@ txtNum = 0
 
 book.close()
 
-sentence = 'please enter valid loan income'
+sentence = 'please enter valid mobile'
 
 '''please enter lan number'''
 '''please enter valid loan income'''
+'''please enter valid mobile'''
 
 res = es.search(index='conversion', body={'query': {'match' : { 'English' : sentence }}})
 
@@ -77,7 +78,7 @@ for line in nenglish:
                 break
 
 
-'''Case 1: Line of the same length (Differs by one word)'''
+'''Case 1: Lines of the same length (Differs by one word)'''
 if len(sentence) == len(nenglish[0]) and exists == False:
     sn = list(set(sentence.split()) - set(nenglish[0].split()))
     ns = list(set(nenglish[0].split()) - set(sentence.split()))
@@ -123,10 +124,45 @@ if len(sentence) == len(nenglish[0]) and exists == False:
 
     print (t[0].join(nhindi[0].split(t[1])))
 
+elif len(sentence) < len(nenglish[0]):
+    remove = list(set(nenglish[0].split()) - set(sentence.split()))
+    print(remove)
 
+    t = []
+    res = es.search(index='conversion', body={'query': {'match' : { 'English' : 'no' }}})
 
-    
+    reqTranslation = []
+    nt = []
+        
+    for hit in res['hits']['hits']:
+        print(hit['_id'], '->', hit['_source'])
+        reqTranslation.append(hit['_source']['Translation'])
+        print()
 
+    print(reqTranslation)
 
+    '''Cleaning the corpus - Removing punctuations'''
+    translator = str.maketrans('','', string.punctuation)
 
+    for i in range(len(reqTranslation)):
+        nt.append(reqTranslation[i].translate(translator))
+
+    print(nt)
+
+    words = [word for line in nt for word in line.split()] 
+
+    print(words,'\n\n')
+
+    counts = collections.Counter(words)
+
+    if counts:
+        name1, count1 = counts.most_common(1)[0]
+        name2, count2 = counts.most_common(2)[1]
+        if count1 == count2:
+            t.append(name1+' '+name2)
+        else:
+            t.append(name1)
+    print(t)
+
+    print (nhindi[0].replace(t[0],''))
 
