@@ -56,25 +56,17 @@ def translate(lst):
         counts = collections.Counter(words)
 
         if counts:
-            name1, count1 = counts.most_common(1)[0]
-            t.append(name1)
-            print(t)
-##            name2, count2 = counts.most_common(2)[1]
-##            if count1 == count2:
-##                t.append(name1+' '+name2)
-##            else:
-##                t.append(name1)
-                
+            name, count = counts.most_common(1)[0]
+            t.append(name)
     return t    
 
 
-sentence = 'supply chain management'
+'''Main Translation'''
+#(UPTO CASHBACK cases) 
 
-#Starting
-#sage university
-#mathematics
-#diploma-mechanical-course
-#Pay With Paytm
+sentence = 'Upto Rs. 50 Cashback'
+
+translation = 'तक का कैशबैक'
 
 res = es.search(index='conversion', body={'query': {'match' : { 'English' : sentence }}})
 
@@ -89,7 +81,7 @@ for hit in res['hits']['hits']:
     hindi.append(hit['_source']['Translation'])
     print()
 
-print(english,'\n')
+print('HINDI')
 print(hindi,'\n')
 
 
@@ -97,36 +89,57 @@ print(hindi,'\n')
 for line in english:
     nenglish.append(line.replace('\n',''))
 
+print('ENGLISH')
 print(nenglish,'\n')
 
 
-#If line exists in given corpus
-for line in nenglish:
-    if line == sentence:
-        exists = True
-        for hit in res['hits']['hits']:
-            if hit['_source']['English'] == sentence:
-                print(hit['_source']['Translation'])
-                break
+#UPTO CASHBACK
+if sentence.find('Upto') != -1 and sentence.find('Cashback') != -1:
+    start, *middle, end = sentence.split()
+    if '%' not in sentence:
+        number = [s for s in middle if s.isdigit()]
+        toTranslate = [s for s in middle if not s.isdigit()]
+        translated = translate(toTranslate)
+        print('TRANSLATED', translated)
+        print(translated[0]+' '+number[0]+' '+translation)
+    else:
+        print(str(''.join(middle))+' '+ translation)
 
-#If line does not exist
-if len(sentence) == len(nenglish[0]) and exists == False:
-    words = sentence.split()
-    t = translate(words)
-    print(str(' '.join(t)))
+else:
+    print('WHY AM I IN ELSE?')
+    #If line exists in given corpus
+    for line in nenglish:
+        if line.lower() == sentence.lower():
+            exists = True
+            for hit in res['hits']['hits']:
+                if hit['_source']['English'] == sentence+'\n':
+                    print(hit['_source']['Translation'])
+                    break
+
+    #When sentence length equal to search result
+    if len(sentence) == len(nenglish[0]) and exists == False:
+        words = sentence.split()
+        t = translate(words)
+        print(str(' '.join(t)))
+
+    #Length of search result greater than sentence
+    elif len(sentence) < len(nenglish[0]):
+        remove = list(set(nenglish[0].split()) - set(sentence.split()))
+        t = translate(remove)
+
+        for i in range(len(t)):
+            hindi[0] = hindi[0].replace(t[i],'')
+
+        print(hindi[0])
 
 
-#Length of search result greater than sentence
-elif len(sentence) < len(nenglish[0]):
-    remove = list(set(nenglish[0].split()) - set(sentence.split()))
-    print('remove', remove)
+    ###When the sentence has only one word(for accurate results)
+    ##if len(sentence.split()) == 1 and exists == False:
+    ##    search = []
+    ##    search.append(sentence)
+    ##    print(str(''.join(translate(search))))
 
-    t = translate(remove)
-    print('t', t)
 
-    translated = []
-    for i in range(len(t)):
-        hindi[0] = hindi[0].replace(t[i],'')
-        hindi[0] = hindi[0].replace('&', '')
 
-    print(hindi[0])
+    
+

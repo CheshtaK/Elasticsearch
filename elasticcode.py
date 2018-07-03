@@ -80,6 +80,7 @@ def translate(lst):
 
 
 '''Main Translation'''
+#(PLEASE ENTER cases)
 
 sentence = 'please enter your income and mobile number'
 
