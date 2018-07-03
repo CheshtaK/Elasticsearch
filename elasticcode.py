@@ -18,17 +18,17 @@ book = open(r'enhitr.txt', encoding = 'utf-8')
 lineNum = 0 
 txtNum = 0 
 
-##for line in book:
-##    lineNum += 1
-##    print(lineNum)
-##    if len(line) > 0:
-##            txtNum += 1
-##            val = line.split('\t')
-##            es.index(index='conversion', doc_type='file', id=txtNum, body = {
-##                'Translation': val[0],
-##                'English': val[1]
-##            }, request_timeout=30)
-##    
+for line in book:
+    lineNum += 1
+    print(lineNum)
+    if len(line) > 0:
+            txtNum += 1
+            val = line.split('\t')
+            es.index(index='conversion', doc_type='file', id=txtNum, body = {
+                'Translation': val[0],
+                'English': val[1]
+            }, request_timeout=30)
+    
 
 book.close()
 
@@ -81,12 +81,12 @@ def translate(lst):
 
 '''Main Translation'''
 
-sentence = 'please enter valid loan amount and income'
+sentence = 'please enter your income and mobile number'
 
 '''please enter lan number'''
 '''please enter valid loan income'''
 '''please enter valid mobile'''
-'''please enter valid loan amount and income'''
+'''please enter valid loan amount and income''' '''please enter your income and number'''
 
 res = es.search(index='conversion', body={'query': {'match' : { 'English' : sentence }}})
 
@@ -152,6 +152,7 @@ elif len(sentence) > len(nenglish[0]):
     find = list(set(sentence.split()) - set(nenglish[0].split()))
     t = translate(find)
     t = t[::-1]
+    print(t)
 
     *rest, last = nenglish[0].split()
     lastL = []
