@@ -45,34 +45,36 @@ def translate(lst):
             reqTranslation.append(hit['_source']['Translation'])
             print()
 
-        print(reqTranslation)
-
         '''Cleaning the corpus - Removing punctuations'''
         translator = str.maketrans('','', string.punctuation)
 
         for i in range(len(reqTranslation)):
             nt.append(reqTranslation[i].translate(translator))
 
-        print(nt)
-
         words = [word for line in nt for word in line.split()] 
-
-        print(words,'\n\n')
 
         counts = collections.Counter(words)
 
         if counts:
             name1, count1 = counts.most_common(1)[0]
-            name2, count2 = counts.most_common(2)[1]
-            if count1 == count2:
-                t.append(name1+' '+name2)
-            else:
-                t.append(name1)
+            t.append(name1)
+            print(t)
+##            name2, count2 = counts.most_common(2)[1]
+##            if count1 == count2:
+##                t.append(name1+' '+name2)
+##            else:
+##                t.append(name1)
                 
     return t    
 
 
-sentence = ''
+sentence = 'supply chain management'
+
+#Starting
+#sage university
+#mathematics
+#diploma-mechanical-course
+#Pay With Paytm
 
 res = es.search(index='conversion', body={'query': {'match' : { 'English' : sentence }}})
 
@@ -107,9 +109,24 @@ for line in nenglish:
                 print(hit['_source']['Translation'])
                 break
 
-
 #If line does not exist
-if exists == False:
+if len(sentence) == len(nenglish[0]) and exists == False:
     words = sentence.split()
     t = translate(words)
     print(str(' '.join(t)))
+
+
+#Length of search result greater than sentence
+elif len(sentence) < len(nenglish[0]):
+    remove = list(set(nenglish[0].split()) - set(sentence.split()))
+    print('remove', remove)
+
+    t = translate(remove)
+    print('t', t)
+
+    translated = []
+    for i in range(len(t)):
+        hindi[0] = hindi[0].replace(t[i],'')
+        hindi[0] = hindi[0].replace('&', '')
+
+    print(hindi[0])
