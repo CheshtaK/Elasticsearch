@@ -55,9 +55,13 @@ def translate(lst):
 
                 if counts:
                     name, count = counts.most_common(1)[0]
-                    t.append(name)
-    ##                print('TRANSLATION')
-    ##                print(t)
+                    if name != 'का':
+                        t.append(name)
+                    else:
+                        name2, count2 = counts.most_common(2)[1]
+                        t.append(name2)
+##                    print('TRANSLATION')
+##                    print(t)
 
     return t    
 
@@ -68,13 +72,70 @@ def translateS(sentence):
     sentence = sentence.lower()
 
     print(sentence)
+
+    newS = []
+
+    translator = str.maketrans('','', string.punctuation)
+    out = sentence.translate(translator)
+##    print(out)
     
-    words = sentence.split()
+    words = out.split()
 
-    translated = translate(words)
+    #RECHARGE OF case
+    if sentence.find('recharge of') != -1:
+##        print('Recharge case')
+        resRO = es.search(index='recharge', body={'query': {'match' : { 'English' : sentence }}})
 
-    print(str(' '.join(translated)), '\n')
-    return(str(' '.join(translated)))
+        roEnglish = []
+        roHindi = []
+        removeT = []
+        findT = []
+        exists = False
+
+        for hit in resRO['hits']['hits']:
+##            print(hit['_id'], '->', hit['_source'])
+            roEnglish.append(hit['_source']['English'].lower())
+            roHindi.append(hit['_source']['Translation'])
+##            print()
+
+        for line in roEnglish:
+            if sentence.strip() == line.strip():
+                exists = True
+                for hit in resRO['hits']['hits']:
+                    if hit['_source']['English'].lower().strip() == (sentence+'\n').strip():
+                        print(hit['_source']['Translation'])
+                        return (hit['_source']['Translation'])
+                        break
+
+##        print(exists)
+        
+        if exists == False:
+            remove = list(set(roEnglish[0].split()) - set(sentence.split()))
+##            print('REMOVE', remove, '\n')
+
+            find = list(set(sentence.split()) - set(roEnglish[0].split()))
+##            print('FIND', find, '\n')
+
+            if remove:
+                removeT = translate(remove)
+##                print('REMOVE TRANSLATED', removeT, '\n')
+
+            if find:
+                findT = translate(find)
+##                print('FIND TRANSLATED', findT)
+
+            if remove and find:
+                if len(remove) > 1:
+                    roHindi[0] = roHindi[0].replace(removeT[0], '').replace(removeT[1], str(' '.join(findT)))
+                roHindi[0] = roHindi[0].replace(removeT[0], str(' '.join(findT)))
+            print(roHindi[0],'\n')
+            return(roHindi[0])
+
+    else:
+        translated = translate(words)
+
+        print(str(' '.join(translated)), '\n')
+        return(str(' '.join(translated)))
 
 ##    print('SENTENCE')
 ##    print(sentence,'\n')
@@ -207,24 +268,32 @@ def main():
 ##        lineNum = 0
 ##        txtNum = 0
 ##        uNum = 0
+##        rNum = 0
 ##        for line in f:
 ##            lineNum += 1
-####            print(lineNum)
+##            print(lineNum)
 ##            if len(line) > 0:
 ##                if '|' in line:
 ##                    txtNum += 1
 ##                    val = re.split('[\t|]+', line)
+##
+##                    if val[2].find('Recharge of') != -1:
+##                        rNum += 1
+##                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
 ##                    
-##                    if val[2].find('Upto') != -1 and val[2].find('Cashback') != -1:
-####                        print('Upto')
+##                    elif val[2].find('Upto') != -1 and val[2].find('Cashback') != -1:
 ##                        uNum += 1
 ##                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
 ##                        
 ##                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
 ##                    
 ##                    txtNum += 1
-##                    if val[3].find('Upto') != -1 and val[3].find('Cashback') != -1:
-####                        print('Upto')
+##                    
+##                    if val[3].find('Recharge of') != -1:
+##                        rNum += 1
+##                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
+##                        
+##                    elif val[3].find('Upto') != -1 and val[3].find('Cashback') != -1:
 ##                        uNum += 1
 ##                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
 ##                        
@@ -233,20 +302,36 @@ def main():
 ##                else:
 ##                    txtNum += 1
 ##                    val = line.split('\t')
-##                    if val[1].find('Upto') != -1 and val[1].find('Cashback') != -1:
-####                        print('Upto')
+##
+##                    if val[1].find('Recharge of') != -1:
+##                        rNum += 1
+##                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
+##                    
+##                    elif val[1].find('Upto') != -1 and val[1].find('Cashback') != -1:
 ##                        uNum += 1
 ##                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
 ##    
 ##                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
-##
+
 
 ##    '''Check if indexed'''
-##    res = es.get(index = "conversion", doc_type = "file", id = "2")
+##    res = es.get(index = "conversion", doc_type = "file", id = "1")
+##    print(res['_source'])
+##
+##    res = es.get(index = "upto", doc_type = "file", id = "1")
+##    print(res['_source'])
+##
+##    res = es.get(index = "recharge", doc_type = "file", id = "1")
 ##    print(res['_source'])
 
     '''List to contain the final translated line'''
     translated = []
+
+##    test = []
+##    test.append('recharge')
+##    print(translate(test))
+
+    '''Remove punctuations and add spaces'''
 
     '''Reading the English file'''
     with open('en.txt', 'r', encoding = 'utf-8-sig') as english:
