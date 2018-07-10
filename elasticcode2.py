@@ -23,14 +23,9 @@ def translate(lst):
         nt = []
         exists = False
 
-        print('WORD')
-        print(word)
-        
         for hit in res['hits']['hits']:
-            print(hit['_id'], '->', hit['_source'])
             e.append(hit['_source']['English'].lower())
             reqTranslation.append(hit['_source']['Translation'])
-##            print()
 
         if word.replace('.','',1).isdigit() or any(char.isdigit() for char in word):
             t.append(word)
@@ -42,7 +37,6 @@ def translate(lst):
                         if hit['_source']['English'].lower().strip() == word:
                             t.append(hit['_source']['Translation'])
                             break
-
 
             if exists == False:
                 '''Cleaning the corpus - Removing punctuations'''
@@ -62,8 +56,6 @@ def translate(lst):
                     else:
                         name2, count2 = counts.most_common(2)[1]
                         t.append(name2)
-##                    print('TRANSLATION')
-##                    print(t)
 
     return t    
 
@@ -73,14 +65,11 @@ def translate(lst):
 def translateS(sentence):  
     sentence = sentence.lower()
 
-
-'''Recharge of'''
-
-    print('SENTENCE')
     print(sentence)
 
     newS = []
 
+    '''Removing all punctuations'''
     translator = str.maketrans('','', string.punctuation)
     out = sentence.translate(translator)
     words = out.split()
@@ -93,7 +82,6 @@ def translateS(sentence):
     existsM = False
 
     for hit in res['hits']['hits']:
-##        print(hit['_id'], '->', hit['_source'])
         temp.append(hit['_source']['English'].lower())
         hindi.append(hit['_source']['Translation'])
 
@@ -108,7 +96,7 @@ def translateS(sentence):
             existsM = True
             for hit in res['hits']['hits']:
                 if hit['_source']['English'].lower().strip() == (sentence+'\n').strip():
-                    print('Translation -> ', hit['_source']['Translation'])
+                    print('Direct Translation -> ', hit['_source']['Translation'])
                     return (hit['_source']['Translation'])
                     break
 
@@ -124,7 +112,6 @@ def translateS(sentence):
         exists = False
 
         for hit in resRO['hits']['hits']:
-##            print(hit['_id'], '->', hit['_source'])
             roEnglish.append(hit['_source']['English'].lower())
             roHindi.append(hit['_source']['Translation'])
 
@@ -133,101 +120,90 @@ def translateS(sentence):
                 exists = True
                 for hit in resRO['hits']['hits']:
                     if hit['_source']['English'].lower().strip() == (sentence+'\n').strip():
-                        print(hit['_source']['Translation'])
+                        print('Direct Translation(Recharge case) -> ', hit['_source']['Translation'])
                         return (hit['_source']['Translation'])
                         break
         
         if exists == False:
             remove = list(set(roEnglish[0].split()) - set(sentence.split()))
-##            print('REMOVE', remove, '\n')
 
             find = list(set(sentence.split()) - set(roEnglish[0].split()))
-##            print('FIND', find, '\n')
 
             if remove:
                 removeT = translate(remove)
-##                print('REMOVE TRANSLATED', removeT, '\n')
 
             if find:
                 findT = translate(find)
-##                print('FIND TRANSLATED', findT)
 
             if remove and find:
                 if len(remove) > 1:
                     roHindi[0] = roHindi[0].replace(removeT[0], '').replace(removeT[1], str(' '.join(findT)))
-                roHindi[0] = roHindi[0].replace(removeT[0], str(' '.join(findT)))
-            print(roHindi[0],'\n')
+                else:
+                    roHindi[0] = roHindi[0].replace(removeT[0], str(' '.join(findT)))
+                
+            print('Translation(Recharge case) -> ', roHindi[0],'\n')
             return(roHindi[0])
 
+    #UPTO CASHBACK case
+    elif sentence.find('upto') != -1 and sentence.find('cashback') != -1 and existsM == False:
+        resUC = es.search(index='upto', body={'query': {'match' : { 'English' : sentence }}})
+
+        ucEnglish = []
+        ucHindi = []
+
+        for hit in resUC['hits']['hits']:
+            ucEnglish.append(hit['_source']['English'].lower())
+            ucHindi.append(hit['_source']['Translation'])
+            
+        remove = list(set(ucEnglish[0].split()) - set(sentence.split()))
+        find = list(set(sentence.split()) - set(ucEnglish[0].split()))
+
+        removeT = translate(remove)
+        findT = translate(find)
+
+        ucHindi[0] = ucHindi[0].replace(removeT[0], str(''.join(findT)))
+        
+        print('Translation(Upto Case) -> ', ucHindi[0],'\n')
+        return(ucHindi[0])
+    
     else:
         translated = translate(words)
 
-##        e = []
-##
-##        for word in enumerate(sentence.split()):
-##            e.append(word)
-##
-##        print(e)
 
-##        for word in sentence:
-##            if word in punctuation:
-##                print(word)
-                
-        print(str(' '.join(translated)), '\n')
-        return(str(' '.join(translated)))
+        '''Adding back the punctuations'''
+        e = []
+        positions = []
+        punctuations = []
+        h = []
+        final = []
+
+        for word in enumerate(sentence.split()):
+            e.append(word)
+   
+        for pos, word in e:
+            for i in word:
+                if i in punctuation:
+                    positions.append(pos)
+                    punctuations.append(i)
+
+        for hword in enumerate(translated):
+            h.append(hword)
+
+        i = 0        
+        for pos, word in h:
+            if pos in positions:
+                word = word+punctuations[i]
+                i += 1
+            final.append(word)
+
+        print('Word Translated -> ', str(' '.join(final)))
+        return(str(' '.join(final)))
 
 
 
 
-'''Upto Cashback'''
+'''Subtract lines method'''
 
-##    print('SENTENCE')
-##    print(sentence,'\n')
-##    
-##    res = es.search(index='conversion', body={'query': {'match' : { 'English' : sentence }}})
-##
-##    english = []
-##    temp = []
-##    hindi = []
-##    exists = False
-##
-##    for hit in res['hits']['hits']:
-####        print(hit['_id'], '->', hit['_source'])
-##        temp.append(hit['_source']['English'].lower())
-##        hindi.append(hit['_source']['Translation'])
-####        print()
-##
-##    print('HINDI')
-##    print(hindi,'\n')
-##
-##
-##    '''Cleaning the English corpus'''
-##    for line in temp:
-##        english.append(line.replace('\n',''))
-##
-##    print('ENGLISH')
-##    print(english,'\n')
-##
-##
-##    #If line exists in given corpus
-##    for line in english:
-####        print('LINE')
-####        print(line,'\n')
-####        print(sentence, '\n')
-##        if sentence.strip() == line.strip():
-##            exists = True
-##            for hit in res['hits']['hits']:
-####                print('HITS')
-####                print(hit['_source']['English'].lower().strip())
-####                print((sentence+'\n').strip())
-##                if hit['_source']['English'].lower().strip() == (sentence+'\n').strip():
-##                    return (hit['_source']['Translation'])
-##                    break
-##
-##
-##    print('EXISTS', exists)
-##
-##
 ##    if exists == False:
 ##        remove = list(set(english[0].split()) - set(sentence.split()))
 ##        find = list(set(sentence.split()) - set(english[0].split()))
@@ -251,35 +227,6 @@ def translateS(sentence):
 ##        print('TRANSLATION', hindi[0])
 ##        return hindi[0]
 
-
-##    #UPTO CASHBACK case
-##    if sentence.find('Upto') != -1 and sentence.find('Cashback') != -1 and exists == False:
-##        resUC = es.search(index='upto', body={'query': {'match' : { 'English' : sentence }}})
-##
-##        ucEnglish = []
-##        ucHindi = []
-##
-##        for hit in resUC['hits']['hits']:
-##            print(hit['_id'], '->', hit['_source'])
-##            ucEnglish.append(hit['_source']['English'].lower())
-##            ucHindi.append(hit['_source']['Translation'])
-##            
-##        remove = list(set(ucEnglish[0].split()) - set(sentence.split()))
-##        print('REMOVE', remove, '\n')
-##
-##        find = list(set(sentence.split()) - set(ucEnglish[0].split()))
-##        print('FIND', find, '\n')
-##
-##        removeT = translate(remove)
-##        print('REMOVE TRANSLATED', removeT, '\n')
-##
-##        findT = translate(find)
-##        print('FIND TRANSLATED', findT)
-##
-##        ucHindi[0] = ucHindi[0].replace(removeT[0], str(''.join(findT)))
-##        return(ucHindi[0])
-##
-##
 ##    #When sentence length equal to search result
 ##    elif len(sentence) == len(english[0]) and exists == False:
 ##        words = sentence.split()
@@ -305,6 +252,8 @@ def translateS(sentence):
 ##        print(str(''.join(translate(search))))
 
 
+
+'''Main function'''
 def main():
     
 ##    '''Indexing the corpus'''
@@ -368,14 +317,10 @@ def main():
 ##    res = es.get(index = "recharge", doc_type = "file", id = "1")
 ##    print(res['_source'])
 
+
+
     '''List to contain the final translated line'''
     translated = []
-
-##    test = []
-##    test.append('sports')
-##    print(translate(test))
-
-    '''Remove punctuations and add spaces'''
 
     '''Reading the English file'''
     with open('en.txt', 'r', encoding = 'utf-8-sig') as english:
