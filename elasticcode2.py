@@ -5,6 +5,8 @@ import collections
 import requests
 import re
 
+from string import punctuation
+
 es = Elasticsearch(HOST = "http://localhost", PORT = 9200)
 es = Elasticsearch()
 
@@ -21,15 +23,14 @@ def translate(lst):
         nt = []
         exists = False
 
-##        print('WORD')
-##        print(word)
+        print('WORD')
+        print(word)
         
         for hit in res['hits']['hits']:
-##            print(hit['_id'], '->', hit['_source'])
+            print(hit['_id'], '->', hit['_source'])
             e.append(hit['_source']['English'].lower())
             reqTranslation.append(hit['_source']['Translation'])
 ##            print()
-
 
         if word.replace('.','',1).isdigit() or any(char.isdigit() for char in word):
             t.append(word)
@@ -40,6 +41,7 @@ def translate(lst):
                     for hit in res['hits']['hits']:
                         if hit['_source']['English'].lower().strip() == word:
                             t.append(hit['_source']['Translation'])
+                            break
 
 
             if exists == False:
@@ -55,7 +57,7 @@ def translate(lst):
 
                 if counts:
                     name, count = counts.most_common(1)[0]
-                    if name != 'का':
+                    if name != 'का' and name != 'के':
                         t.append(name)
                     else:
                         name2, count2 = counts.most_common(2)[1]
@@ -71,19 +73,48 @@ def translate(lst):
 def translateS(sentence):  
     sentence = sentence.lower()
 
+
+'''Recharge of'''
+
+    print('SENTENCE')
     print(sentence)
 
     newS = []
 
     translator = str.maketrans('','', string.punctuation)
     out = sentence.translate(translator)
-##    print(out)
-    
     words = out.split()
 
+    res = es.search(index='conversion', body={'query': {'match' : { 'English' : sentence }}})
+
+    english = []
+    temp = []
+    hindi = []
+    existsM = False
+
+    for hit in res['hits']['hits']:
+##        print(hit['_id'], '->', hit['_source'])
+        temp.append(hit['_source']['English'].lower())
+        hindi.append(hit['_source']['Translation'])
+
+    '''Cleaning the English corpus'''
+    for line in temp:
+        english.append(line.replace('\n',''))
+
+
+    #If line exists in given corpus
+    for line in english:
+        if sentence.strip() == line.strip():
+            existsM = True
+            for hit in res['hits']['hits']:
+                if hit['_source']['English'].lower().strip() == (sentence+'\n').strip():
+                    print('Translation -> ', hit['_source']['Translation'])
+                    return (hit['_source']['Translation'])
+                    break
+
+
     #RECHARGE OF case
-    if sentence.find('recharge of') != -1:
-##        print('Recharge case')
+    if sentence.find('recharge of') != -1 and existsM == False:
         resRO = es.search(index='recharge', body={'query': {'match' : { 'English' : sentence }}})
 
         roEnglish = []
@@ -96,7 +127,6 @@ def translateS(sentence):
 ##            print(hit['_id'], '->', hit['_source'])
             roEnglish.append(hit['_source']['English'].lower())
             roHindi.append(hit['_source']['Translation'])
-##            print()
 
         for line in roEnglish:
             if sentence.strip() == line.strip():
@@ -106,8 +136,6 @@ def translateS(sentence):
                         print(hit['_source']['Translation'])
                         return (hit['_source']['Translation'])
                         break
-
-##        print(exists)
         
         if exists == False:
             remove = list(set(roEnglish[0].split()) - set(sentence.split()))
@@ -134,8 +162,24 @@ def translateS(sentence):
     else:
         translated = translate(words)
 
+##        e = []
+##
+##        for word in enumerate(sentence.split()):
+##            e.append(word)
+##
+##        print(e)
+
+##        for word in sentence:
+##            if word in punctuation:
+##                print(word)
+                
         print(str(' '.join(translated)), '\n')
         return(str(' '.join(translated)))
+
+
+
+
+'''Upto Cashback'''
 
 ##    print('SENTENCE')
 ##    print(sentence,'\n')
@@ -254,11 +298,11 @@ def translateS(sentence):
 ##        return(hindi[0])
 ##
 
-    ###When the sentence has only one word(for accurate results)
-    ##if len(sentence.split()) == 1 and exists == False:
-    ##    search = []
-    ##    search.append(sentence)
-    ##    print(str(''.join(translate(search))))
+##    #When the sentence has only one word(for accurate results)
+##    if len(sentence.split()) == 1 and exists == False:
+##        search = []
+##        search.append(sentence)
+##        print(str(''.join(translate(search))))
 
 
 def main():
@@ -328,7 +372,7 @@ def main():
     translated = []
 
 ##    test = []
-##    test.append('recharge')
+##    test.append('sports')
 ##    print(translate(test))
 
     '''Remove punctuations and add spaces'''
