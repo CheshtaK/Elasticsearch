@@ -28,7 +28,6 @@ def translate(lst):
             reqTranslation.append(hit['_source']['Translation'])
 
         if word.replace('.','',1).isdigit() or any(char.isdigit() for char in word):
-            exists = True
             t.append(word)
         else:
             for line in e:

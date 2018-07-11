@@ -33,7 +33,6 @@ def translate(word):
                 for hit in res['hits']['hits']:
                     if hit['_source']['English'].lower().strip() == word:
                         return (word.rstrip() + '\t' + hit['_source']['Translation'])
-                        break
 
     if exists == False:
         '''Cleaning the corpus - Removing punctuations'''
