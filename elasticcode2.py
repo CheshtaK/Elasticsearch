@@ -28,6 +28,7 @@ def translate(lst):
             reqTranslation.append(hit['_source']['Translation'])
 
         if word.replace('.','',1).isdigit() or any(char.isdigit() for char in word):
+            exists = True
             t.append(word)
         else:
             for line in e:
@@ -126,7 +127,6 @@ def translateS(sentence):
         
         if exists == False:
             remove = list(set(roEnglish[0].split()) - set(sentence.split()))
-
             find = list(set(sentence.split()) - set(roEnglish[0].split()))
 
             if remove:
