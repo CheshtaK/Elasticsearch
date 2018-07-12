@@ -74,11 +74,6 @@ def translate(lst):
                 
     return t    
 
-##test = []
-##test.append('income')
-##print(translate(test))
-
-
 '''Main Translation'''
 #(PLEASE ENTER cases)
 

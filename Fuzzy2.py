@@ -6,7 +6,7 @@ from string import punctuation
 es = Elasticsearch(HOST = "http://localhost", PORT = 9200)
 es = Elasticsearch()
 
-## 'upto rs _ cashback when you pay using Paytm at _' - Case
+## '__ | __' - Case
 
 '''Function to translate a single word at a time'''
 def translate(lst):
@@ -54,15 +54,16 @@ def translate(lst):
                         name2, count2 = counts.most_common(2)[1]
                         t.append(name2)
 
-    return t    
+    return t
 
-
-'''Main Translation (Translates a sentence)'''
 def translateS(sentence):
-    sentence = sentence.lower()
-    print('Sentence -> ', sentence.rstrip())
 
-    query = {'query' : {'query_string' : {'query': sentence, 'fuzziness' : 2}}}
+    translated = []
+    sentence = sentence.lower().split('|')
+    print('Sentence -> ', sentence)
+
+    #For first part of sentence
+    query = {'query' : {'query_string' : {'query': sentence[0].rstrip(), 'fuzziness' : 1}}}
     res = es.search(index = 'conversion', body = query)
 
     english = []
@@ -79,17 +80,20 @@ def translateS(sentence):
     
     #If line exists in given corpus
     for line in english:
-        if sentence.strip() == line.strip():
+        if sentence[0].strip() == line.strip():
             exists = True
             for hit in res['hits']['hits']:
-                if hit['_source']['English'].lower().strip() == (sentence+'\n').strip():
-                    print('Direct Translation -> ', hit['_source']['Translation'])
-                    return (hit['_source']['Translation'])
+                if hit['_source']['English'].lower().strip() == (sentence[0]+'\n').strip():
+                    translated.append(hit['_source']['Translation'])
+                    break
+                break
+            break
+
 
     if exists == False:
-        removetemp = list(set(english[0].split()) - set(sentence.split()))
+        removetemp = list(set(english[0].split()) - set(sentence[0].split()))
         remove = [value for value in removetemp if not value.isdigit()]
-        findtemp = list(set(sentence.split()) - set(english[0].split()))
+        findtemp = list(set(sentence[0].split()) - set(english[0].split()))
         find = [value for value in findtemp if not value.isdigit()]
 
         if remove:
@@ -98,21 +102,52 @@ def translateS(sentence):
         if find:
             findT = translate(find)
 
-        #Replacing the number
-        for number in sentence.split():
-            if number.isdigit():
-                a = number
-
-        for n in hindi[0].split():
-            if n.isdigit():
-                hindi[0] = hindi[0].replace(n, a)
-
         if removeT and findT:
             hindi[0] = hindi[0].replace(removeT[0], findT[0])
-            print('Translation -> ', hindi[0], '\n')
-            return hindi[0]
+            translated.append(hindi[0])
 
 
+    #For second part of sentence
+    query = {'query' : {'query_string' : {'query': sentence[1].rstrip(), 'fuzziness' : 1}}}
+    res = es.search(index = 'conversion', body = query)
+
+    english = []
+    hindi = []
+    temp = []
+    exists = False
+
+    for hit in res['hits']['hits']:
+        temp.append(hit['_source']['English'].lower())
+        hindi.append(hit['_source']['Translation'])
+
+    for line in temp:
+        english.append(line.replace('\n',''))
+    
+    #If line exists in given corpus
+    for line in english:
+        if sentence[1].strip() == line.strip():
+            exists = True
+            for hit in res['hits']['hits']:
+                if hit['_source']['English'].lower().strip() == (sentence[1]+'\n').strip():
+                    translated.append(hit['_source']['Translation'])
+                    break
+                break
+            break
+
+    if exists == False:
+        for number in sentence[1].split():
+            if number.isdigit() or any(char.isdigit() for char in number):
+                a = number
+
+        for n in hindi[2].split():
+            if n.isdigit() or any(char.isdigit() for char in n):
+                hindi[2] = hindi[2].replace(n, a)
+
+        translated.append(hindi[2])
+
+    print('TRANSLATED -> ', str('|'.join(translated))) 
+    
+    
 
 def main():
     translated = []
@@ -124,3 +159,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

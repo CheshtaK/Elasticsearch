@@ -57,28 +57,27 @@ def translate(word):
 
 def main():
     '''Finding unique words from file'''
-##    with open('test.txt', 'r', encoding = 'utf-8-sig') as f:
-##        contents = f.read()
-##        word_list = contents.split()
-##    
-##    unique_words = set(word_list)
-##    
-##    with open('words.txt', 'w', encoding = 'utf-8-sig') as out:
-##        for word in unique_words:
-##            out.write(str(word) + '\n')
-##
+    with open('test.txt', 'r', encoding = 'utf-8-sig') as f:
+        contents = f.read()
+        word_list = contents.split()
+    
+    unique_words = set(word_list)
+    
+    with open('words.txt', 'w', encoding = 'utf-8-sig') as out:
+        for word in unique_words:
+            out.write(str(word) + '\n')
+
 
     '''Translating each word'''
 
     trans = []
+    with open('words.txt', 'r', encoding = 'utf-8-sig') as f:
+        for line in f:
+            trans.append(translate(line))
 
-##    with open('words.txt', 'r', encoding = 'utf-8-sig') as f:
-##        for line in f:
-##            trans.append(translate(line))
-##
-##    with open('wordTranslate.txt', 'w', encoding = 'utf-8-sig') as f:
-##        for i in trans:
-##            f.write(str(i) +'\n')
+    with open('wordTranslate.txt', 'w', encoding = 'utf-8-sig') as f:
+        for i in trans:
+            f.write(str(i) +'\n')
 
 if __name__ == '__main__':
     main()

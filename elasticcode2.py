@@ -200,121 +200,69 @@ def translateS(sentence):
 
 
 
-
-'''Subtract lines method'''
-
-##    if exists == False:
-##        remove = list(set(english[0].split()) - set(sentence.split()))
-##        find = list(set(sentence.split()) - set(english[0].split()))
-##
-##        if remove:
-##            removeT = translate(remove)
-##
-##        if find:
-##            findT = translate(find)
-##
-##        print('REMOVE', remove)
-##        print('FIND', find)
-##        print('REMOVET', removeT)
-##        print('FINDT', findT)
-##
-##        for i in range(len(removeT)):
-##            hindi[0] = hindi[0].replace(removeT[i],'')
-##
-##        hindi[0] = hindi[0] + ' ' + str(' '.join(findT))
-##
-##        print('TRANSLATION', hindi[0])
-##        return hindi[0]
-
-##    #When sentence length equal to search result
-##    elif len(sentence) == len(english[0]) and exists == False:
-##        words = sentence.split()
-##        t = translate(words)
-##        return(str(' '.join(t)))
-##
-##
-##    #Length of search result greater than sentence
-##    elif len(sentence) < len(english[0]):
-##        remove = list(set(english[0].split()) - set(sentence.split()))
-##        t = translate(remove)
-##
-##        for i in range(len(t)):
-##            hindi[0] = hindi[0].replace(t[i],'')
-##
-##        return(hindi[0])
-##
-
-##    #When the sentence has only one word(for accurate results)
-##    if len(sentence.split()) == 1 and exists == False:
-##        search = []
-##        search.append(sentence)
-##        print(str(''.join(translate(search))))
-
-
-
 '''Main function'''
 def main():
     
-##    '''Indexing the corpus'''
-##    with open('finalpaytm.txt', encoding = 'utf-8') as f:
-##        lineNum = 0
-##        txtNum = 0
-##        uNum = 0
-##        rNum = 0
-##        for line in f:
-##            lineNum += 1
-##            print(lineNum)
-##            if len(line) > 0:
-##                if '|' in line:
-##                    txtNum += 1
-##                    val = re.split('[\t|]+', line)
-##
-##                    if val[2].find('Recharge of') != -1:
-##                        rNum += 1
-##                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
-##                    
-##                    elif val[2].find('Upto') != -1 and val[2].find('Cashback') != -1:
-##                        uNum += 1
-##                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
-##                        
-##                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
-##                    
-##                    txtNum += 1
-##                    
-##                    if val[3].find('Recharge of') != -1:
-##                        rNum += 1
-##                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
-##                        
-##                    elif val[3].find('Upto') != -1 and val[3].find('Cashback') != -1:
-##                        uNum += 1
-##                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
-##                        
-##                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
-##                    
-##                else:
-##                    txtNum += 1
-##                    val = line.split('\t')
-##
-##                    if val[1].find('Recharge of') != -1:
-##                        rNum += 1
-##                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
-##                    
-##                    elif val[1].find('Upto') != -1 and val[1].find('Cashback') != -1:
-##                        uNum += 1
-##                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
-##    
-##                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
+    '''Indexing the corpus'''
+    with open('finalpaytm.txt', encoding = 'utf-8') as f:
+        lineNum = 0
+        txtNum = 0
+        uNum = 0
+        rNum = 0
+        for line in f:
+            lineNum += 1
+            print(lineNum)
+            if len(line) > 0:
+                if '|' in line:
+                    txtNum += 1
+                    val = re.split('[\t|]+', line)
+
+                    if val[2].find('Recharge of') != -1:
+                        rNum += 1
+                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
+                    
+                    elif val[2].find('Upto') != -1 and val[2].find('Cashback') != -1:
+                        uNum += 1
+                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
+                        
+                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
+                    
+                    txtNum += 1
+                    
+                    if val[3].find('Recharge of') != -1:
+                        rNum += 1
+                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
+                        
+                    elif val[3].find('Upto') != -1 and val[3].find('Cashback') != -1:
+                        uNum += 1
+                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
+                        
+                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
+                    
+                else:
+                    txtNum += 1
+                    val = line.split('\t')
+
+                    if val[1].find('Recharge of') != -1:
+                        rNum += 1
+                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
+                    
+                    elif val[1].find('Upto') != -1 and val[1].find('Cashback') != -1:
+                        uNum += 1
+                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
+    
+                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
 
 
-##    '''Check if indexed'''
-##    res = es.get(index = "conversion", doc_type = "file", id = "1")
-##    print(res['_source'])
-##
-##    res = es.get(index = "upto", doc_type = "file", id = "1")
-##    print(res['_source'])
-##
-##    res = es.get(index = "recharge", doc_type = "file", id = "1")
-##    print(res['_source'])
+    '''Check if indexed'''
+    res = es.get(index = "conversion", doc_type = "file", id = "1")
+    print(res['_source'])
+
+    res = es.get(index = "upto", doc_type = "file", id = "1")
+    print(res['_source'])
+
+    res = es.get(index = "recharge", doc_type = "file", id = "1")
+    print(res['_source'])
 
 
 
