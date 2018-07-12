@@ -6,7 +6,7 @@ from string import punctuation
 es = Elasticsearch(HOST = "http://localhost", PORT = 9200)
 es = Elasticsearch()
 
-## '__ | __' - Case
+## '__ |/: __' - Case
 
 '''Function to translate a single word at a time'''
 def translate(lst):
@@ -58,9 +58,17 @@ def translate(lst):
 
 def translateS(sentence):
 
+    print('Sentence -> ', sentence.rstrip())
+
     translated = []
-    sentence = sentence.lower().split('|')
-    print('Sentence -> ', sentence)
+    sentence = sentence.lower()
+    
+    if '|' in sentence.split():
+        sentence = sentence.split('|')
+        sep = '|'
+    elif ':' in sentence.split():
+        sentence = sentence.split(':')
+        sep = ':'
 
     #For first part of sentence
     query = {'query' : {'query_string' : {'query': sentence[0].rstrip(), 'fuzziness' : 1}}}
@@ -95,6 +103,9 @@ def translateS(sentence):
         remove = [value for value in removetemp if not value.isdigit()]
         findtemp = list(set(sentence[0].split()) - set(english[0].split()))
         find = [value for value in findtemp if not value.isdigit()]
+
+        removeT = []
+        findT = []
 
         if remove:
             removeT = translate(remove)
@@ -131,7 +142,6 @@ def translateS(sentence):
                 if hit['_source']['English'].lower().strip() == (sentence[1]+'\n').strip():
                     translated.append(hit['_source']['Translation'])
                     break
-                break
             break
 
     if exists == False:
@@ -145,9 +155,8 @@ def translateS(sentence):
 
         translated.append(hindi[2])
 
-    print('TRANSLATED -> ', str('|'.join(translated))) 
-    
-    
+    print('TRANSLATED -> ', str(sep.join(translated)), '\n') 
+        
 
 def main():
     translated = []
