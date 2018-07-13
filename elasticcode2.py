@@ -203,55 +203,55 @@ def translateS(sentence):
 '''Main function'''
 def main():
     
-    '''Indexing the corpus'''
-    with open('finalpaytm.txt', encoding = 'utf-8') as f:
-        lineNum = 0
-        txtNum = 0
-        uNum = 0
-        rNum = 0
-        for line in f:
-            lineNum += 1
-            print(lineNum)
-            if len(line) > 0:
-                if '|' in line:
-                    txtNum += 1
-                    val = re.split('[\t|]+', line)
-
-                    if val[2].find('Recharge of') != -1:
-                        rNum += 1
-                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
-                    
-                    elif val[2].find('Upto') != -1 and val[2].find('Cashback') != -1:
-                        uNum += 1
-                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
-                        
-                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
-                    
-                    txtNum += 1
-                    
-                    if val[3].find('Recharge of') != -1:
-                        rNum += 1
-                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
-                        
-                    elif val[3].find('Upto') != -1 and val[3].find('Cashback') != -1:
-                        uNum += 1
-                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
-                        
-                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
-                    
-                else:
-                    txtNum += 1
-                    val = line.split('\t')
-
-                    if val[1].find('Recharge of') != -1:
-                        rNum += 1
-                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
-                    
-                    elif val[1].find('Upto') != -1 and val[1].find('Cashback') != -1:
-                        uNum += 1
-                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
-    
-                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
+##    '''Indexing the corpus'''
+##    with open('finalpaytm.txt', encoding = 'utf-8') as f:
+##        lineNum = 0
+##        txtNum = 0
+##        uNum = 0
+##        rNum = 0
+##        for line in f:
+##            lineNum += 1
+##            print(lineNum)
+##            if len(line) > 0:
+##                if '|' in line:
+##                    txtNum += 1
+##                    val = re.split('[\t|]+', line)
+##
+##                    if val[2].find('Recharge of') != -1:
+##                        rNum += 1
+##                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
+##                    
+##                    elif val[2].find('Upto') != -1 and val[2].find('Cashback') != -1:
+##                        uNum += 1
+##                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
+##                        
+##                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[2].replace('\n','').lower()}, request_timeout=30)
+##                    
+##                    txtNum += 1
+##                    
+##                    if val[3].find('Recharge of') != -1:
+##                        rNum += 1
+##                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
+##                        
+##                    elif val[3].find('Upto') != -1 and val[3].find('Cashback') != -1:
+##                        uNum += 1
+##                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
+##                        
+##                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[1],'English': val[3].replace('\n','').lower()}, request_timeout=30)
+##                    
+##                else:
+##                    txtNum += 1
+##                    val = line.split('\t')
+##
+##                    if val[1].find('Recharge of') != -1:
+##                        rNum += 1
+##                        es.index(index='recharge', doc_type='file', id=rNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
+##                    
+##                    elif val[1].find('Upto') != -1 and val[1].find('Cashback') != -1:
+##                        uNum += 1
+##                        es.index(index='upto', doc_type='file', id=uNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
+##    
+##                    es.index(index='conversion', doc_type='file', id=txtNum, body = {'Translation': val[0],'English': val[1].replace('\n','').lower()}, request_timeout=30)
 
 
     '''Check if indexed'''

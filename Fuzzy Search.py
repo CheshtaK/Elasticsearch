@@ -71,6 +71,7 @@ def translateS(sentence):
     exists = False
 
     for hit in res['hits']['hits']:
+        print(hit['_source'])
         temp.append(hit['_source']['English'].lower())
         hindi.append(hit['_source']['Translation'])
 
@@ -120,6 +121,10 @@ def main():
     with open('cb.txt', 'r', encoding = 'utf-8-sig') as f:
         for line in f:
             translated.append(translateS(line))
+
+    with open('final.txt', 'w', encoding = 'utf-8-sig') as t:
+        for line in translated:
+            t.write('%s\n' %line)
 
 
 if __name__ == '__main__':

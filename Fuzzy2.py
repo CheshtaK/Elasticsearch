@@ -144,7 +144,7 @@ def translateS(sentence):
     elif ':' in sentence.split():
         sentence = sentence.replace(':', '')
 
-    print('FIRST TRANSLATION', t1, '\n')
+    print('First Transation -> ', t1, '\n')
     print('To Remove -> ', toremove[0], '\n')
     print('Sentence Left -> ', sentence.rstrip(), '\n')
 
@@ -221,14 +221,15 @@ def translateS(sentence):
             t2 = hindi[0]
 
 
-    print('SECOND TRANSLATION', t2, '\n')
+    print('Second Translation -> ', t2, '\n')
 
     #To get position of first and second segment
     if all(i in sentence.split() for i in orig.split('|', 1)[0].split()):
-        print('FINAL -> ', t2, '|', t1)
+        print('FINAL -> ', t2, '|', t1, '\n\n\n')
+        return (t2 + '|' + t1)
     else:
-        print('FINAL -> ', t1, '|', t2)
-    print('\n\n')
+        print('FINAL -> ', t1, '|', t2, '\n\n\n')
+        return (t1 + '|' + t2)
 
 def main():
     translated = []
@@ -236,6 +237,10 @@ def main():
     with open('cb.txt', 'r', encoding = 'utf-8-sig') as f:
         for line in f:
             translated.append(translateS(line))
+
+    with open('final.txt', 'w', encoding = 'utf-8-sig') as t:
+        for line in translated:
+            t.write('%s\n' %line)
 
 
 if __name__ == '__main__':
