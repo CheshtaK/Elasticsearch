@@ -3,10 +3,12 @@ import string
 import collections
 from string import punctuation
 
+import regex as re
+
 es = Elasticsearch(HOST = "http://localhost", PORT = 9200)
 es = Elasticsearch()
 
-## '__ |/: __' - Case
+## '__ | __' - Case
 
 '''Function to translate a single word at a time'''
 def translate(lst):
@@ -58,25 +60,104 @@ def translate(lst):
 
 def translateS(sentence):
 
-    print('Sentence -> ', sentence.rstrip())
+    print('Sentence -> ', sentence.rstrip(), '\n')
 
-    translated = []
+    toremove = []
     sentence = sentence.lower()
-    
-    if '|' in sentence.split():
-        sentence = sentence.split('|')
-        sep = '|'
-    elif ':' in sentence.split():
-        sentence = sentence.split(':')
-        sep = ':'
+    orig = sentence
 
-    #For first part of sentence
-    query = {'query' : {'query_string' : {'query': sentence[0].rstrip(), 'fuzziness' : 1}}}
+    ## Removing numbers and percentages
+    for word in sentence.split():
+        if word.isdigit():
+            a1 = word
+            sentence = sentence.replace(a1, '')
+        elif any(char == '%' for char in word):
+            a2 = re.findall(r'\d+%', sentence)
+            sentence = sentence.replace(a2[0], '')
+
+    print('New Sentence -> ', sentence.rstrip(), '\n')
+    
+    # Searching
+    query = {'query' : {'query_string' : {'query': sentence.rstrip(), 'fuzziness' : 1}}}
     res = es.search(index = 'conversion', body = query)
 
     english = []
     hindi = []
     temp = []
+    exists = False
+    num = False
+
+    for hit in res['hits']['hits']:
+        temp.append(hit['_source']['English'].lower())
+        hindi.append(hit['_source']['Translation'])
+
+    for line in temp:
+        english.append(line.replace('\n',''))
+    
+    #If line exists in given corpus
+    for line in english:
+        if sentence.strip() == line.strip():
+            exists = True
+            for hit in res['hits']['hits']:
+                if hit['_source']['English'].lower().strip() == (sentence+'\n').strip():
+                    t1 = hit['_source']['Translation']
+                    toremove.append(hit['_source']['English'])
+                    break
+                break
+            break
+
+    #Replacing given number with our number
+    for word in hindi[0].split():
+        if word.isdigit():
+            num = True
+            hindi[0] = hindi[0].replace(word, a1)
+        elif any(char == '%' for char in word):
+            num = True
+            a = re.findall(r'\d+%', hindi[0])
+            hindi[0] = hindi[0].replace(a[0], a2[0])
+
+    t1 = hindi[0]
+
+    # Getting the string to be removed
+    if num:
+        for word in english[0].split():
+            if word.isdigit():
+                english[0] = english[0].replace(word, '')
+            elif any(char == '%' for char in word):
+                b2 = re.findall(r'\d+%', english[0])
+                english[0] = english[0].replace(b2[0], '')
+        toremove.append(english[0])
+
+    #For non-number containing string
+    t = []
+    if exists == False and num == False:
+        t.append(sentence.split('|', 1)[0])
+        toremove.append(sentence.split('|', 1)[0])
+        t = translate(t)
+        if t:
+            t1 = t[0]
+    
+    sentence = str(''.join(sentence.rsplit(toremove[0].strip())))
+
+    if '|' in sentence.split():
+        sentence = sentence.replace('|', '')
+    elif ':' in sentence.split():
+        sentence = sentence.replace(':', '')
+
+    print('FIRST TRANSLATION', t1, '\n')
+    print('To Remove -> ', toremove[0], '\n')
+    print('Sentence Left -> ', sentence.rstrip(), '\n')
+
+    '''SECOND PART'''
+
+    # Searching
+    query = {'query' : {'query_string' : {'query': sentence.rstrip(), 'fuzziness' : 1}}}
+    res = es.search(index = 'conversion', body = query)
+
+    english = []
+    hindi = []
+    temp = []
+    num = False
     exists = False
 
     for hit in res['hits']['hits']:
@@ -88,24 +169,46 @@ def translateS(sentence):
     
     #If line exists in given corpus
     for line in english:
-        if sentence[0].strip() == line.strip():
+        if sentence.strip() == line.strip():
             exists = True
             for hit in res['hits']['hits']:
-                if hit['_source']['English'].lower().strip() == (sentence[0]+'\n').strip():
-                    translated.append(hit['_source']['Translation'])
+                if hit['_source']['English'].lower().strip() == (sentence+'\n').strip():
+                    t2 = hit['_source']['Translation']
                     break
                 break
             break
 
+    #Replacing given number with our number
+    for word in hindi[0].split():
+        if word.isdigit():
+            num = True
+            hindi[0] = hindi[0].replace(word, a1)
+        elif any(char == '%' for char in word):
+            num = True
+            a = re.findall(r'\d+%', hindi[0])
+            hindi[0] = hindi[0].replace(a[0], a2[0])
 
-    if exists == False:
-        removetemp = list(set(english[0].split()) - set(sentence[0].split()))
+    if num:
+        t2 = hindi[0]
+
+    # Getting the string to be removed
+    if num:
+        for word in english[0].split():
+            if word.isdigit():
+                english[0] = english[0].replace(word, '')
+            elif any(char == '%' for char in word):
+                b2 = re.findall(r'\d+%', english[0])
+                english[0] = english[0].replace(b2[0], '')
+
+
+    #For non-number containing string
+    t = []
+    if exists == False and num == False:
+        t.append(sentence.split('|', 1)[0])
+        removetemp = list(set(english[0].split()) - set(t[0].split()))
         remove = [value for value in removetemp if not value.isdigit()]
-        findtemp = list(set(sentence[0].split()) - set(english[0].split()))
+        findtemp = list(set(t[0].split()) - set(english[0].split()))
         find = [value for value in findtemp if not value.isdigit()]
-
-        removeT = []
-        findT = []
 
         if remove:
             removeT = translate(remove)
@@ -115,48 +218,17 @@ def translateS(sentence):
 
         if removeT and findT:
             hindi[0] = hindi[0].replace(removeT[0], findT[0])
-            translated.append(hindi[0])
+            t2 = hindi[0]
 
 
-    #For second part of sentence
-    query = {'query' : {'query_string' : {'query': sentence[1].rstrip(), 'fuzziness' : 1}}}
-    res = es.search(index = 'conversion', body = query)
+    print('SECOND TRANSLATION', t2, '\n')
 
-    english = []
-    hindi = []
-    temp = []
-    exists = False
-
-    for hit in res['hits']['hits']:
-        temp.append(hit['_source']['English'].lower())
-        hindi.append(hit['_source']['Translation'])
-
-    for line in temp:
-        english.append(line.replace('\n',''))
-    
-    #If line exists in given corpus
-    for line in english:
-        if sentence[1].strip() == line.strip():
-            exists = True
-            for hit in res['hits']['hits']:
-                if hit['_source']['English'].lower().strip() == (sentence[1]+'\n').strip():
-                    translated.append(hit['_source']['Translation'])
-                    break
-            break
-
-    if exists == False:
-        for number in sentence[1].split():
-            if number.isdigit() or any(char.isdigit() for char in number):
-                a = number
-
-        for n in hindi[2].split():
-            if n.isdigit() or any(char.isdigit() for char in n):
-                hindi[2] = hindi[2].replace(n, a)
-
-        translated.append(hindi[2])
-
-    print('TRANSLATED -> ', str(sep.join(translated)), '\n') 
-        
+    #To get position of first and second segment
+    if all(i in sentence.split() for i in orig.split('|', 1)[0].split()):
+        print('FINAL -> ', t2, '|', t1)
+    else:
+        print('FINAL -> ', t1, '|', t2)
+    print('\n\n')
 
 def main():
     translated = []
